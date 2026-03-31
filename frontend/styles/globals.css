@@ -2,18 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
 
 @layer base {
   html { scroll-behavior: smooth; }
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-[#0f0f13] text-gray-100;
+    background-color: #111318;
+    color: #e2e8f0;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 }
 
 @layer components {
+  /* ── Reader typography ── */
   .reader-content {
     font-family: 'Lora', Georgia, serif;
     font-size: 1.125rem;
@@ -26,72 +29,99 @@
     hyphens: auto;
   }
 
-  .glass {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+  /* ── Sidebar nav item ── */
+  .nav-item {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center text-gray-500
+      hover:text-white hover:bg-white/10 transition-all duration-150 cursor-pointer;
+  }
+  .nav-item.active {
+    @apply text-white bg-white/10;
   }
 
-  .glass-light {
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.06);
+  /* ── Section label ── */
+  .section-label {
+    @apply text-xs font-semibold text-gray-500 uppercase tracking-[0.12em];
   }
 
-  .btn-primary {
-    @apply bg-amber-500 hover:bg-amber-400 text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200 text-sm shadow-lg shadow-amber-500/20;
+  /* ── Input dark ── */
+  .input-dark {
+    background-color: #1e2130;
+    @apply border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 w-full
+      focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/30 transition text-sm;
   }
 
-  .btn-ghost {
-    @apply text-gray-400 hover:text-white hover:bg-white/10 font-medium px-4 py-2 rounded-xl transition-all duration-200 text-sm;
-  }
-
+  /* ── Input light (reader, auth) ── */
   .input-field {
     @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500
     focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition;
   }
 
-  .input-field-light {
-    @apply w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400
-    focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 transition;
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply bg-orange-500 hover:bg-orange-400 text-white font-semibold px-5 py-2.5 rounded-xl
+      transition-all duration-200 text-sm shadow-lg shadow-orange-500/20;
+  }
+  .btn-ghost {
+    @apply text-gray-400 hover:text-white hover:bg-white/10 font-medium px-3 py-2 rounded-xl
+      transition-all duration-200 text-sm;
   }
 
-  .section-label {
-    @apply text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4;
+  /* ── Glassmorphism ── */
+  .glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .glass-light {
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #0f0f13; }
-::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
-
-/* Book card 3D tilt on hover */
-.book-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  transform-style: preserve-3d;
-}
-.book-card:hover {
-  transform: translateY(-6px) scale(1.01);
+/* ── Glow effects ── */
+.glow-violet {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.08);
 }
 
-/* Shimmer animation */
+/* ── Crying book animation ── */
+@keyframes bookBob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes tearDrop {
+  0%   { opacity: 0; transform: translateY(0); }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(14px); }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2e3347; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+/* ── Shimmer skeleton ── */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, #1a1a24 25%, #23232f 50%, #1a1a24 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, #1a1d28 25%, #22263a 50%, #1a1d28 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
 }
 
-/* Glow pulse for AI section */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.15); }
-  50% { box-shadow: 0 0 40px rgba(139,92,246,0.3); }
+/* ── Book card hover ── */
+.book-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.book-card:hover { transform: translateY(-4px); }
+
+/* ── Horizontal scroll (Continue Reading) ── */
+.scroll-x {
+  overflow-x: auto;
+  scrollbar-width: none;
 }
-.glow-violet { animation: glow-pulse 3s ease-in-out infinite; }
+.scroll-x::-webkit-scrollbar { display: none; }

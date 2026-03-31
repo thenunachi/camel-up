@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
 
@@ -23,11 +22,8 @@ export default function Profile() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#0f0f13]">
-        <Navbar />
-        <div className="flex items-center justify-center py-32">
-          <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
-        </div>
+      <div className="ml-[60px] min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -42,10 +38,8 @@ export default function Profile() {
   return (
     <>
       <Head><title>{data.user.username} — KindleRead</title></Head>
-      <div className="min-h-screen bg-[#0f0f13]">
-        <Navbar />
-
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+      <div className="ml-[60px] min-h-screen">
+        <main className="max-w-4xl mx-auto px-5 sm:px-8 py-10 space-y-8">
 
           {/* ── Profile header ── */}
           <div className="glass border border-white/8 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-5">

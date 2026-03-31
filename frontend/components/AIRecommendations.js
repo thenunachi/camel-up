@@ -84,21 +84,21 @@ export default function AIRecommendations() {
       </div>
 
       {/* Input + submit */}
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <input
           type="text"
           value={preference}
           onChange={(e) => { setPreference(e.target.value); setBooks([]); setError(""); }}
           placeholder='Or type freely: "dark academia, unreliable narrator"'
           style={{ backgroundColor: "#1e1b2e", colorScheme: "dark" }}
-          className="flex-1 border border-violet-500/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500
+          className="w-full border border-violet-500/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500
             focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition"
         />
         <button
           type="submit"
           disabled={loading || !preference.trim()}
-          className="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-600/30 disabled:text-white/30
-            text-white text-sm font-semibold rounded-xl transition-all duration-200 flex items-center gap-2 whitespace-nowrap
+          className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-600/30 disabled:text-white/30
+            text-white text-sm font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2
             shadow-lg shadow-violet-500/20"
         >
           {loading ? (
@@ -126,7 +126,7 @@ export default function AIRecommendations() {
           <p className="text-xs text-violet-400 font-semibold uppercase tracking-widest mb-3">
             Picks for · {preference}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex flex-col gap-3">
             {books.map((book, i) => (
               <BookSuggestionCard
                 key={i}
