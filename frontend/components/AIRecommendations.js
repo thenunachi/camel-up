@@ -90,8 +90,9 @@ export default function AIRecommendations() {
           value={preference}
           onChange={(e) => { setPreference(e.target.value); setBooks([]); setError(""); }}
           placeholder='Or type freely: "dark academia, unreliable narrator"'
-          className="flex-1 bg-white/4 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600
-            focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/30 transition"
+          style={{ backgroundColor: "#1e1b2e", colorScheme: "dark" }}
+          className="flex-1 border border-violet-500/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition"
         />
         <button
           type="submit"
@@ -152,7 +153,9 @@ function BookSuggestionCard({ book, index, user, onAdded }) {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
+  const [imgError, setImgError] = useState(false);
   const c = CARD_ACCENTS[index % CARD_ACCENTS.length];
+  const showCover = book.cover_url && !imgError;
 
   const handleAdd = async () => {
     if (!user) {
@@ -168,7 +171,6 @@ function BookSuggestionCard({ book, index, user, onAdded }) {
         description: book.description,
       });
       setAdded(true);
-      // Short delay so user sees the checkmark before navigating
       setTimeout(() => onAdded(data.book), 800);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to add book. Try again.");
@@ -177,52 +179,72 @@ function BookSuggestionCard({ book, index, user, onAdded }) {
   };
 
   return (
-    <div className={`rounded-xl p-4 border ${c.border} ${c.bg} flex flex-col gap-3`}>
-      {/* Title + author */}
-      <div>
-        <p className={`font-bold text-sm leading-snug ${c.title}`}>{book.title}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{book.author}</p>
+    <div className={`rounded-xl border ${c.border} ${c.bg} flex flex-col overflow-hidden`}>
+      {/* Cover photo */}
+      <div className="relative h-40 w-full flex-shrink-0 overflow-hidden">
+        {showCover ? (
+          <img
+            src={book.cover_url}
+            alt={book.title}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-end p-3"
+            style={{ background: `linear-gradient(135deg, #2a1f3d, #1a1030)` }}
+          >
+            <p className={`font-bold text-sm leading-snug ${c.title} drop-shadow`}>{book.title}</p>
+          </div>
+        )}
+        {/* gradient overlay at bottom so text is readable over photo */}
+        {showCover && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-3">
+            <p className="font-bold text-sm text-white leading-snug drop-shadow line-clamp-2">{book.title}</p>
+          </div>
+        )}
       </div>
 
-      {/* Description */}
-      <p className="text-xs text-gray-400 leading-relaxed flex-1">{book.description}</p>
+      {/* Body */}
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        <p className="text-xs text-gray-500">{book.author}</p>
 
-      {/* Why you'll love it */}
-      {book.why && (
-        <p className="text-xs text-gray-600 italic leading-relaxed border-t border-white/5 pt-2">
-          💡 {book.why}
-        </p>
-      )}
+        <p className="text-xs text-gray-400 leading-relaxed flex-1">{book.description}</p>
 
-      {/* Error */}
-      {error && <p className="text-xs text-red-400">{error}</p>}
-
-      {/* CTA */}
-      <button
-        onClick={handleAdd}
-        disabled={adding || added}
-        className={`w-full py-2 rounded-lg text-xs font-bold text-white transition-all duration-200 shadow-lg flex items-center justify-center gap-1.5
-          ${added ? "bg-green-600 shadow-green-600/20" : c.btn} disabled:opacity-60`}
-      >
-        {added ? (
-          <>
-            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Added! Opening...
-          </>
-        ) : adding ? (
-          <>
-            <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-            </svg>
-            Generating content...
-          </>
-        ) : (
-          <>+ Add to Library</>
+        {book.why && (
+          <p className="text-xs text-gray-600 italic leading-relaxed border-t border-white/5 pt-2">
+            💡 {book.why}
+          </p>
         )}
-      </button>
+
+        {error && <p className="text-xs text-red-400">{error}</p>}
+
+        <button
+          onClick={handleAdd}
+          disabled={adding || added}
+          className={`w-full py-2 rounded-lg text-xs font-bold text-white transition-all duration-200 shadow-lg flex items-center justify-center gap-1.5
+            ${added ? "bg-green-600 shadow-green-600/20" : c.btn} disabled:opacity-60`}
+        >
+          {added ? (
+            <>
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Added! Opening...
+            </>
+          ) : adding ? (
+            <>
+              <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+              Generating content...
+            </>
+          ) : (
+            <>+ Add to Library</>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
