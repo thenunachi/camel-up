@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import bcrypt
+import httpx
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,6 +39,37 @@ JWT_EXPIRE_HOURS = 72
 security = HTTPBearer(auto_error=False)
 
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+# ── Cover image helper ─────────────────────────────────────────────────────
+
+def fetch_cover_url(title: str, author: str) -> str:
+    """Search Open Library for a book cover. Returns URL string or empty string."""
+    try:
+        query = f"{title} {author}".strip()
+        resp = httpx.get(
+            "https://openlibrary.org/search.json",
+            params={"q": query, "limit": 1, "fields": "cover_i,isbn"},
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            return ""
+        data = resp.json()
+        docs = data.get("docs", [])
+        if not docs:
+            return ""
+        doc = docs[0]
+        # Prefer cover_i (cover ID) first
+        cover_id = doc.get("cover_i")
+        if cover_id:
+            return f"https://covers.openlibrary.org/b/id/{cover_id}-L.jpg"
+        # Fall back to first ISBN
+        isbns = doc.get("isbn", [])
+        if isbns:
+            return f"https://covers.openlibrary.org/b/isbn/{isbns[0]}-L.jpg"
+        return ""
+    except Exception:
+        return ""
+
 
 # ── Startup ────────────────────────────────────────────────────────────────
 
@@ -219,7 +251,7 @@ def add_ai_book(body: AddBookRequest, current_user=Depends(get_current_user)):
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
-        "SELECT id, title, author, cover_color, total_words, source FROM books WHERE lower(title) = lower(?) AND lower(author) = lower(?)",
+        "SELECT id, title, author, cover_color, cover_url, total_words, source FROM books WHERE lower(title) = lower(?) AND lower(author) = lower(?)",
         (body.title.strip(), body.author.strip()),
     )
     existing = cur.fetchone()
@@ -259,15 +291,16 @@ Start directly with the book's content."""
 
     color = random.choice(COVER_COLORS)
     word_count = len(content.split())
+    cover_url = fetch_cover_url(body.title.strip(), body.author.strip())
 
     cur.execute(
-        "INSERT INTO books (title, author, cover_color, content, total_words, source) VALUES (?, ?, ?, ?, ?, 'ai_generated')",
-        (body.title.strip(), body.author.strip(), color, content, word_count),
+        "INSERT INTO books (title, author, cover_color, cover_url, content, total_words, source) VALUES (?, ?, ?, ?, ?, ?, 'ai_generated')",
+        (body.title.strip(), body.author.strip(), color, cover_url, content, word_count),
     )
     conn.commit()
     new_id = cur.lastrowid
 
-    cur.execute("SELECT id, title, author, cover_color, total_words, source FROM books WHERE id = ?", (new_id,))
+    cur.execute("SELECT id, title, author, cover_color, cover_url, total_words, source FROM books WHERE id = ?", (new_id,))
     new_book = dict(cur.fetchone())
     conn.close()
 
@@ -363,6 +396,9 @@ Format:
             raw = raw.strip()
 
         books = json.loads(raw)
+        # Fetch cover photos for each suggested book
+        for book in books:
+            book["cover_url"] = fetch_cover_url(book.get("title", ""), book.get("author", ""))
         return {"books": books}
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="AI returned malformed response. Please try again.")
